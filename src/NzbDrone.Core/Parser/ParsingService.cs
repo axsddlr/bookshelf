@@ -5,6 +5,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
@@ -30,18 +31,21 @@ namespace NzbDrone.Core.Parser
         private readonly IBookService _bookService;
         private readonly IEditionService _editionService;
         private readonly IMediaFileService _mediaFileService;
+        private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public ParsingService(IAuthorService authorService,
                               IBookService bookService,
                               IEditionService editionService,
                               IMediaFileService mediaFileService,
+                              IConfigService configService,
                               Logger logger)
         {
             _bookService = bookService;
             _editionService = editionService;
             _authorService = authorService;
             _mediaFileService = mediaFileService;
+            _configService = configService;
             _logger = logger;
         }
 
@@ -202,6 +206,7 @@ namespace NzbDrone.Core.Parser
 
         public ParsedBookInfo ParseBookTitleFuzzy(string title)
         {
+            var threshold = _configService.MatchThreshold;
             var bestScore = 0.0;
 
             Author bestAuthor = null;
@@ -213,12 +218,12 @@ namespace NzbDrone.Core.Parser
             {
                 _logger.Trace($"Trying possible author {author}");
 
-                var authorMatch = title.FuzzyMatch(author.Metadata.Value.Name, 0.5);
+                var authorMatch = title.FuzzyMatch(author.Metadata.Value.Name, threshold);
                 var possibleBooks = _bookService.GetCandidates(author.AuthorMetadataId, title);
 
                 foreach (var book in possibleBooks)
                 {
-                    var bookMatch = title.FuzzyMatch(book.Title, 0.5);
+                    var bookMatch = title.FuzzyMatch(book.Title, threshold);
                     var score = (authorMatch.Item3 + bookMatch.Item3) / 2;
 
                     _logger.Trace($"Book {book} has score {score}");
@@ -233,7 +238,7 @@ namespace NzbDrone.Core.Parser
                 var possibleEditions = _editionService.GetCandidates(author.AuthorMetadataId, title);
                 foreach (var edition in possibleEditions)
                 {
-                    var editionMatch = title.FuzzyMatch(edition.Title, 0.5);
+                    var editionMatch = title.FuzzyMatch(edition.Title, threshold);
                     var score = (authorMatch.Item3 + editionMatch.Item3) / 2;
 
                     _logger.Trace($"Edition {edition} has score {score}");

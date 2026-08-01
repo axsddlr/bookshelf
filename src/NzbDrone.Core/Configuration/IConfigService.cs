@@ -72,6 +72,7 @@ namespace NzbDrone.Core.Configuration
         WriteBookTagsType WriteBookTags { get; set; }
         bool UpdateCovers { get; set; }
         bool EmbedMetadata { get; set; }
+        double MatchThreshold { get; set; }
 
         //Forms Auth
         string RijndaelPassphrase { get; }

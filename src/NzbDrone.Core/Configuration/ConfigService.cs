@@ -428,6 +428,12 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("TrustCgnatIpAddresses", value); }
         }
 
+        public double MatchThreshold
+        {
+            get { return GetValueDouble("MatchThreshold", 0.65); }
+            set { SetValue("MatchThreshold", value); }
+        }
+
         private string GetValue(string key)
         {
             return GetValue(key, string.Empty);
@@ -441,6 +447,11 @@ namespace NzbDrone.Core.Configuration
         private int GetValueInt(string key, int defaultValue = 0)
         {
             return Convert.ToInt32(GetValue(key, defaultValue));
+        }
+
+        private double GetValueDouble(string key, double defaultValue = 0)
+        {
+            return Convert.ToDouble(GetValue(key, defaultValue), CultureInfo.InvariantCulture);
         }
 
         private T GetValueEnum<T>(string key, T defaultValue)
@@ -483,6 +494,11 @@ namespace NzbDrone.Core.Configuration
         private void SetValue(string key, Enum value)
         {
             SetValue(key, value.ToString().ToLower());
+        }
+
+        private void SetValue(string key, double value)
+        {
+            SetValue(key, value.ToString(CultureInfo.InvariantCulture));
         }
 
         private void SetValue(string key, string value)
