@@ -1,0 +1,22 @@
+services:
+  bookshelf:
+    image: ghcr.io/axsddlr/bookshelf:hardcover
+    container_name: bookshelf
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=022
+      - TZ=Etc/UTC
+    volumes:
+      - ./config:/config
+      - /path/to/books:/books
+      - /path/to/downloads:/downloads
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:8787/api/v1/health || exit 1
+      interval: 5m
+      timeout: 10s
+      retries: 2
+      start_period: 30s
