@@ -342,8 +342,17 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             var requestBuilder = new HttpRequestBuilder(settings.UseSsl, settings.Host, settings.Port, settings.UrlBase)
             {
                 LogResponseContent = true,
-                NetworkCredential = new BasicNetworkCredential(settings.Username, settings.Password)
             };
+
+            if (settings.ApiKey.IsNotNullOrWhiteSpace())
+            {
+                requestBuilder.Headers.Set("Authorization", $"Bearer {settings.ApiKey}");
+            }
+            else
+            {
+                requestBuilder.NetworkCredential = new BasicNetworkCredential(settings.Username, settings.Password);
+            }
+
             return requestBuilder;
         }
 
@@ -357,6 +366,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private string ProcessRequest(HttpRequestBuilder requestBuilder, QBittorrentSettings settings)
         {
+            if (settings.ApiKey.IsNotNullOrWhiteSpace())
+            {
+                return ProcessRequestWithApiKey(requestBuilder, settings);
+            }
+
             AuthenticateClient(requestBuilder, settings);
 
             var request = requestBuilder.Build();
@@ -377,6 +391,34 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                     request = requestBuilder.Build();
 
                     response = _httpClient.Execute(request);
+                }
+            }
+            catch (HttpException ex)
+            {
+                throw new DownloadClientException("Failed to connect to qBittorrent, check your settings.", ex);
+            }
+            catch (WebException ex)
+            {
+                throw new DownloadClientException("Failed to connect to qBittorrent, please check your settings.", ex);
+            }
+
+            return response.Content;
+        }
+
+        private string ProcessRequestWithApiKey(HttpRequestBuilder requestBuilder, QBittorrentSettings settings)
+        {
+            var request = requestBuilder.Build();
+            request.LogResponseContent = true;
+
+            HttpResponse response;
+            try
+            {
+                response = _httpClient.Execute(request);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized ||
+                    response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    throw new DownloadClientAuthenticationException("Failed to authenticate with qBittorrent using API key.");
                 }
             }
             catch (HttpException ex)
@@ -437,8 +479,8 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                     throw new DownloadClientUnavailableException("Failed to connect to qBittorrent, please check your settings.", ex);
                 }
 
-                // returns "Fails." on bad login
-                if (response.Content != "Ok.")
+                // returns "Fails." on bad login; qBittorrent >= 4.5 returns an empty body on success
+                if (response.Content != "Ok." && !string.IsNullOrEmpty(response.Content))
                 {
                     _logger.Debug("qbitTorrent authentication failed.");
                     throw new DownloadClientAuthenticationException("Failed to authenticate with qBittorrent.");

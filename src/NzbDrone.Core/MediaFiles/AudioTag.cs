@@ -477,9 +477,14 @@ namespace NzbDrone.Core.MediaFiles
 
             if (OriginalReleaseDate?.Date != other.OriginalReleaseDate?.Date)
             {
+                if (!OriginalReleaseDate.HasValue || !other.OriginalReleaseDate.HasValue)
+                {
+                    var oldValue = OriginalReleaseDate.HasValue ? OriginalReleaseDate.Value.ToString("yyyy-MM-dd") : null;
+                    var newValue = other.OriginalReleaseDate.HasValue ? other.OriginalReleaseDate.Value.ToString("yyyy-MM-dd") : null;
+                    output.Add("Original Release Date", Tuple.Create(oldValue, newValue));
+                }
                 // Id3v2.3 tags can only store the year, not the full date
-                if (OriginalReleaseDate.HasValue &&
-                    OriginalReleaseDate.Value.Month == 1 &&
+                else if (OriginalReleaseDate.Value.Month == 1 &&
                     OriginalReleaseDate.Value.Day == 1)
                 {
                     if (OriginalReleaseDate.Value.Year != other.OriginalReleaseDate.Value.Year)
@@ -489,8 +494,8 @@ namespace NzbDrone.Core.MediaFiles
                 }
                 else
                 {
-                    var oldValue = OriginalReleaseDate.HasValue ? OriginalReleaseDate.Value.ToString("yyyy-MM-dd") : null;
-                    var newValue = other.OriginalReleaseDate.HasValue ? other.OriginalReleaseDate.Value.ToString("yyyy-MM-dd") : null;
+                    var oldValue = OriginalReleaseDate.Value.ToString("yyyy-MM-dd");
+                    var newValue = other.OriginalReleaseDate.Value.ToString("yyyy-MM-dd");
                     output.Add("Original Release Date", Tuple.Create(oldValue, newValue));
                 }
             }

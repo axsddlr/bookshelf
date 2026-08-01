@@ -257,13 +257,32 @@ namespace NzbDrone.Core.MediaFiles
                 var paths = _calibre.GetAllBookFilePaths(rootFolder.CalibreSettings);
                 var folderPaths = paths.Where(x => path.IsParentPath(x));
 
-                filesOnDisk = folderPaths.Select(x => _diskProvider.GetFileInfo(x));
+                filesOnDisk = folderPaths.Select(x =>
+                {
+                    try
+                    {
+                        return _diskProvider.GetFileInfo(x);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Debug(ex, "Skipping file due to error getting info: {0}", x);
+                        return null;
+                    }
+                }).Where(x => x != null);
             }
             else
             {
                 _logger.Debug("Scanning '{0}' for ebook files", path);
 
-                filesOnDisk = _diskProvider.GetFileInfos(path, allDirectories);
+                try
+                {
+                    filesOnDisk = _diskProvider.GetFileInfos(path, allDirectories);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Error scanning directory '{0}' for files, trying individual enumeration", path);
+                    filesOnDisk = EnumerateFilesRobustly(path, allDirectories);
+                }
 
                 _logger.Trace("{0} files were found in {1}", filesOnDisk.Count(), path);
             }
@@ -274,6 +293,31 @@ namespace NzbDrone.Core.MediaFiles
             _logger.Debug("{0} book files were found in {1}", mediaFileList.Length, path);
 
             return mediaFileList;
+        }
+
+        private IEnumerable<IFileInfo> EnumerateFilesRobustly(string path, bool allDirectories)
+        {
+            var results = new List<IFileInfo>();
+            try
+            {
+                foreach (var file in _diskProvider.GetFiles(path, allDirectories))
+                {
+                    try
+                    {
+                        results.Add(_diskProvider.GetFileInfo(file));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Debug(ex, "Skipping file with problematic name: {0}", file);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Error enumerating files in directory: {0}", path);
+            }
+
+            return results;
         }
 
         public string[] GetNonBookFiles(string path, bool allDirectories = true)

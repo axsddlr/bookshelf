@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Generators;
 using FluentMigrator.Runner.Initialization;
@@ -33,7 +34,7 @@ namespace NzbDrone.Core.Datastore.Migration.Framework
         {
             var sw = Stopwatch.StartNew();
 
-            _logger.Info("*** Migrating {0} ***", connectionString);
+            _logger.Info("*** Migrating {0} ***", SanitizeConnectionString(connectionString));
 
             ServiceProvider serviceProvider;
 
@@ -86,6 +87,19 @@ namespace NzbDrone.Core.Datastore.Migration.Framework
             sw.Stop();
 
             _logger.Debug("Took: {0}", sw.Elapsed);
+        }
+
+        private static string SanitizeConnectionString(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                return connectionString;
+            }
+
+            return Regex.Replace(connectionString,
+                @"(Password|Pwd|password|pwd|token)\s*=\s*([^;$]+)",
+                "$1=****",
+                RegexOptions.IgnoreCase);
         }
     }
 }

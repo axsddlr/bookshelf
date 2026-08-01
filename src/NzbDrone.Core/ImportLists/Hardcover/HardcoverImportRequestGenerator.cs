@@ -27,9 +27,9 @@ namespace NzbDrone.Core.ImportLists.Hardcover
         {
             var apiKey = NormalizeApiKey(Settings.ApiKey);
 
-            Logger.Info("Hardcover: Fetching books for lists '{0}'", Settings.ListIds);
+            var listIds = (Settings.ListIds ?? Enumerable.Empty<string>()).ToArray();
+            Logger.Info("Hardcover: Fetching books for lists '{0}'", string.Join(", ", listIds));
 
-            // Query to fetch selected lists with their books and author info
             var graphQlBody = JsonSerializer.Serialize(new
             {
                 query = @"
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.ImportLists.Hardcover
                 ",
                 variables = new
                 {
-                    slugs = Settings.ListIds
+                    slugs = listIds
                 }
             });
 
