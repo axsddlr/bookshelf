@@ -48,7 +48,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             var moveFileResult = new BookFileMoveResult();
             var existingFiles = localBook.Book.BookFiles.Value
-                .Where(f => f.EditionId == localBook.Edition.Id || f.EditionId == 0)
+                .Where(f => f.EditionId == 0 || (localBook.Edition != null && f.EditionId == localBook.Edition.Id))
                 .ToList();
 
             var rootFolderPath = _diskProvider.GetParentFolder(localBook.Author.Path);
