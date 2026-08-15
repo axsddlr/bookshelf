@@ -17,7 +17,7 @@ ARG BUILD_DATE
 ARG METADATA_URL=https://api.bookinfo.pro
 ARG HARDCOVER
 
-LABEL maintainer="axsddlr"
+LABEL maintainer="axsddlr" \
       org.opencontainers.image.source="https://github.com/axsddlr/bookshelf"
 
 ENV METADATA_URL=${METADATA_URL}
