@@ -89,6 +89,10 @@ namespace NzbDrone.Core.Test.Configuration
                 {
                     value = true;
                 }
+                else if (propertyInfo.PropertyType == typeof(double))
+                {
+                    value = 0.5;
+                }
                 else if (propertyInfo.PropertyType.BaseType == typeof(Enum))
                 {
                     value = 0;
