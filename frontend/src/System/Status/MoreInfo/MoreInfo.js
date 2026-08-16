@@ -18,12 +18,12 @@ class MoreInfo extends Component {
 
           <DescriptionListItemTitle>Source</DescriptionListItemTitle>
           <DescriptionListItemDescription>
-            <Link to="https://github.com/pennydreadful/bookshelf/">github.com/pennydreadful/bookshelf</Link>
+            <Link to="https://github.com/axsddlr/bookshelf/">github.com/axsddlr/bookshelf</Link>
           </DescriptionListItemDescription>
 
           <DescriptionListItemTitle>Feature Requests</DescriptionListItemTitle>
           <DescriptionListItemDescription>
-            <Link to="https://github.com/pennydreadful/bookshelf/issues">github.com/pennydreadful/bookshelf/issues</Link>
+            <Link to="https://github.com/axsddlr/bookshelf/issues">github.com/axsddlr/bookshelf/issues</Link>
           </DescriptionListItemDescription>
 
         </DescriptionList>

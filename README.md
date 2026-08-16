@@ -14,7 +14,7 @@ book you will need multiple instances.
 
 The container listens on port 8787 and expects a volume mounted at `/config`.
 
-    docker run -p 8787:8787 -v ~/.config/bookshelf:/config ghcr.io/pennydreadful/bookshelf:hardcover
+    docker run -p 8787:8787 -v ~/.config/bookshelf:/config ghcr.io/axsddlr/bookshelf:hardcover
 
 The `softcover` tags use [Goodreads](https://www.goodreads.com) as the metadata
 provider. The quality of this metadata is generally poor and contains a lot of
