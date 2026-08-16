@@ -7,6 +7,7 @@ services:
       - PGID=1000
       - UMASK=022
       - TZ=Etc/UTC
+      - METADATA_URL=http://rreading-glasses:8788
     volumes:
       - ./config-softcover:/config
       - /path/to/books:/books
@@ -14,3 +15,38 @@ services:
     ports:
       - "8788:8787"
     restart: unless-stopped
+    depends_on:
+      - rreading-glasses
+
+  rreading-glasses:
+    image: blampe/rreading-glasses:latest
+    container_name: rreading-glasses
+    hostname: rreading-glasses
+    entrypoint: ["/main", "serve"]
+    command:
+      - --upstream=www.goodreads.com
+      - --verbose
+    environment:
+      - POSTGRES_HOST=rreading-glasses-db
+      - POSTGRES_DATABASE=rreading-glasses
+      - POSTGRES_USER=rreading-glasses
+      - POSTGRES_PASSWORD=change-this-password
+    mem_limit: 128m
+    restart: unless-stopped
+    depends_on:
+      rreading-glasses-db:
+        condition: service_started
+
+  rreading-glasses-db:
+    image: postgres:17
+    container_name: rreading-glasses-db
+    environment:
+      - POSTGRES_USER=rreading-glasses
+      - POSTGRES_PASSWORD=change-this-password
+      - POSTGRES_DB=rreading-glasses
+    volumes:
+      - rreading_glasses_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  rreading_glasses_data:
