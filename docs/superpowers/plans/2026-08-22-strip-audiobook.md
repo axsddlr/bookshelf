@@ -36,9 +36,21 @@ against the actual code, not the spec's simplified file list.
   correct and requires no migration.
 - No test may be deleted without replacement unless the entire class under
   test is deleted in the same task.
-- Run `dotnet test` (or the project's existing test task — check
-  `azure-pipelines.yml` / `build.sh` for the exact invocation) after every
-  task; do not proceed to the next task on a red build.
+- The test project's csproj is `src/NzbDrone.Core.Test/Readarr.Core.Test.csproj`
+  (folder is `NzbDrone.Core.Test`, the project file itself is prefixed
+  `Readarr.*.Test.csproj` — confirmed by running `dotnet test
+  src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter
+  "FullyQualifiedName~Quality"` successfully: 123 passed, 0 failed, before
+  any task in this plan started). Every `dotnet test` invocation in this
+  plan must point at the `.csproj` file directly, not the folder — `dotnet
+  test <folder>` fails with `MSB1009: Project file does not exist` on this
+  repo because the project file name doesn't match the folder name.
+- The .NET SDK is managed via `mise` (see `mise.toml`, pins dotnet
+  6.0.428). If `dotnet` is not on PATH directly, prefix commands with
+  `mise exec --` (e.g. `mise exec -- dotnet test ...`).
+- Run the exact `dotnet test <csproj-path> --filter "..."` command shown in
+  each task step after every task; do not proceed to the next task on a red
+  build.
 
 ---
 
@@ -171,7 +183,7 @@ that removes each reference, so the property isn't orphaned mid-plan. Task
 
 - [ ] **Step 5: Build and run the quality/media-file test suite**
 
-Run: `dotnet test src/NzbDrone.Core.Test --filter "FullyQualifiedName~Quality|FullyQualifiedName~MediaFileExtensions"`
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter "FullyQualifiedName~Quality|FullyQualifiedName~MediaFileExtensions"`
 Expected: build succeeds (any remaining `Quality.MP3` etc. reference is now
 a compile error — fix by proceeding to the next tasks, which remove those
 references) and the filtered tests pass.
@@ -228,7 +240,7 @@ Remove test methods that only exercised the deleted `isAudio` / `wrong_format`
 
 - [ ] **Step 4: Run the distance calculator tests**
 
-Run: `dotnet test src/NzbDrone.Core.Test --filter "FullyQualifiedName~DistanceCalculator"`
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter "FullyQualifiedName~DistanceCalculator"`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -278,7 +290,7 @@ Leave any surrounding non-audio import logic untouched.
 
 - [ ] **Step 4: Run the import tests**
 
-Run: `dotnet test src/NzbDrone.Core.Test --filter "FullyQualifiedName~ImportApprovedBooks"`
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter "FullyQualifiedName~ImportApprovedBooks"`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -485,7 +497,7 @@ confirm each call site is fine with ebook-only extensions).
 
 - [ ] **Step 8: Build and run the full Core test project**
 
-Run: `dotnet test src/NzbDrone.Core.Test`
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj`
 Expected: PASS, zero build errors referencing `AudioTag`, `WriteAudioTags`,
 or `ScrubAudioTags`.
 
@@ -531,7 +543,7 @@ and remove each.
 
 - [ ] **Step 3: Run the notifications test suite**
 
-Run: `dotnet test src/NzbDrone.Core.Test --filter "FullyQualifiedName~Notifications"`
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter "FullyQualifiedName~Notifications"`
 Expected: PASS
 
 - [ ] **Step 4: Commit (only if changes were made in Step 2)**
@@ -560,8 +572,10 @@ Expected: no matches.
 
 - [ ] **Step 3: Run the full test suite**
 
-Run: `dotnet test src/NzbDrone.Core.Test` (and any other `*.Test` project
-listed in the solution — check `Readarr.sln` for the full list if unsure)
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj`
+(and any other `*.Test` project listed in `src/Readarr.sln` if unsure —
+each follows the same `Readarr.<Area>.Test.csproj` naming pattern inside
+its `NzbDrone.<Area>.Test` folder)
 Expected: all PASS, zero build warnings about unresolved `Quality.MP3`
 etc.
 
