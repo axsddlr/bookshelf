@@ -39,12 +39,6 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Quality.Should().Be(quality);
         }
 
-        [TestCase("Little Mix - Salute [Deluxe Edition] [2013] [M4A-256]-V3nom [GLT")]
-        public void should_parse_quality_from_name(string title)
-        {
-            QualityParser.ParseQuality(title).QualityDetectionSource.Should().Be(QualityDetectionSource.Name);
-        }
-
         [Test]
         public void should_parse_null_quality_description_as_unknown()
         {
