@@ -21,25 +21,7 @@ namespace NzbDrone.Core.MediaFiles
                 { ".pdf", Quality.PDF },
             };
 
-            _audioExtensions = new Dictionary<string, Quality>(StringComparer.OrdinalIgnoreCase)
-            {
-                { ".flac", Quality.FLAC },
-                { ".ape", Quality.FLAC },
-                { ".wavpack", Quality.FLAC },
-                { ".wav", Quality.FLAC },
-                { ".alac", Quality.FLAC },
-                { ".mp2", Quality.MP3 },
-                { ".mp3", Quality.MP3 },
-                { ".wma", Quality.MP3 },
-                { ".m4a", Quality.MP3 },
-                { ".m4p", Quality.MP3 },
-                { ".m4b", Quality.M4B },
-                { ".aac", Quality.MP3 },
-                { ".mp4a", Quality.MP3 },
-                { ".ogg", Quality.MP3 },
-                { ".oga", Quality.MP3 },
-                { ".vorbis", Quality.MP3 },
-            };
+            _audioExtensions = new Dictionary<string, Quality>(StringComparer.OrdinalIgnoreCase);
         }
 
         public static HashSet<string> TextExtensions => new HashSet<string>(_textExtensions.Keys, StringComparer.OrdinalIgnoreCase);
