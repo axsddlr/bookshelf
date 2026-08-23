@@ -16,12 +16,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     {
         public static object[] IsUpgradeTestCases =
         {
+            new object[] { Quality.EPUB, 1, Quality.EPUB, 2, Quality.EPUB, true },
             new object[] { Quality.AZW3, 1, Quality.AZW3, 2, Quality.AZW3, true },
-            new object[] { Quality.MP3, 1, Quality.MP3, 2, Quality.MP3, true },
-            new object[] { Quality.MP3, 1, Quality.MP3, 1, Quality.MP3, false },
-            new object[] { Quality.MP3, 1, Quality.AZW3, 2, Quality.MP3, false },
-            new object[] { Quality.MP3, 1, Quality.AZW3, 2, Quality.MP3, false },
-            new object[] { Quality.MP3, 1, Quality.MP3, 1, Quality.MP3, false }
+            new object[] { Quality.AZW3, 1, Quality.AZW3, 1, Quality.AZW3, false },
+            new object[] { Quality.AZW3, 1, Quality.EPUB, 2, Quality.AZW3, false },
+            new object[] { Quality.AZW3, 1, Quality.EPUB, 2, Quality.AZW3, false },
+            new object[] { Quality.AZW3, 1, Quality.AZW3, 1, Quality.AZW3, false }
         };
 
         private void GivenAutoDownloadPropers(ProperDownloadTypes type)
@@ -64,9 +64,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                         profile,
-                        new QualityModel(Quality.MP3, new Revision(version: 1)),
+                        new QualityModel(Quality.AZW3, new Revision(version: 1)),
                         new List<CustomFormat>(),
-                        new QualityModel(Quality.MP3, new Revision(version: 2)),
+                        new QualityModel(Quality.AZW3, new Revision(version: 2)),
                         new List<CustomFormat>())
                     .Should().BeTrue();
         }
@@ -83,9 +83,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                         profile,
-                        new QualityModel(Quality.MP3, new Revision(version: 1)),
+                        new QualityModel(Quality.AZW3, new Revision(version: 1)),
                         new List<CustomFormat>(),
-                        new QualityModel(Quality.MP3, new Revision(version: 2)),
+                        new QualityModel(Quality.AZW3, new Revision(version: 2)),
                         new List<CustomFormat>())
                     .Should().BeFalse();
         }

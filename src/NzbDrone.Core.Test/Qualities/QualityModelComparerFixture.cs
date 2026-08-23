@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Qualities
                                           new QualityProfileQualityItem
                                           {
                                               Allowed = true,
-                                              Quality = Quality.FLAC
+                                              Quality = Quality.PDF
                                           }
                                       }
             };
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.FLAC);
+            var first = new QualityModel(Quality.AZW3);
             var second = new QualityModel(Quality.MOBI);
 
             var compare = Subject.Compare(first, second);
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Test.Qualities
             GivenDefaultProfile();
 
             var first = new QualityModel(Quality.MOBI);
-            var second = new QualityModel(Quality.FLAC);
+            var second = new QualityModel(Quality.AZW3);
 
             var compare = Subject.Compare(first, second);
 

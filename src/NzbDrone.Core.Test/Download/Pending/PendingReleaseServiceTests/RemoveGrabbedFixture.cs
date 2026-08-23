@@ -41,12 +41,12 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.EPUB.Id,
                 Items = new List<QualityProfileQualityItem>
                                    {
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.MP3 },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.MP3 },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.FLAC }
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.EPUB },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.EPUB },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.AZW3 }
                                    },
             };
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
             _parsedBookInfo = Builder<ParsedBookInfo>.CreateNew().Build();
-            _parsedBookInfo.Quality = new QualityModel(Quality.MP3);
+            _parsedBookInfo.Quality = new QualityModel(Quality.EPUB);
 
             _remoteBook = new RemoteBook();
             _remoteBook.Books = new List<Book> { _book };
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         [Test]
         public void should_delete_if_the_grabbed_quality_is_the_higher()
         {
-            GivenHeldRelease(new QualityModel(Quality.MP3));
+            GivenHeldRelease(new QualityModel(Quality.EPUB));
 
             Subject.Handle(new BookGrabbedEvent(_remoteBook));
 
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         [Test]
         public void should_not_delete_if_the_grabbed_quality_is_the_lower()
         {
-            GivenHeldRelease(new QualityModel(Quality.FLAC));
+            GivenHeldRelease(new QualityModel(Quality.AZW3));
 
             Subject.Handle(new BookGrabbedEvent(_remoteBook));
 

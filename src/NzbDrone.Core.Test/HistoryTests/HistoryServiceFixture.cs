@@ -27,14 +27,14 @@ namespace NzbDrone.Core.Test.HistoryTests
         {
             _profile = new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.AZW3.Id,
                 Items = QualityFixture.GetDefaultQualities(),
             };
 
             _profileCustom = new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
-                Items = QualityFixture.GetDefaultQualities(Quality.MP3),
+                Cutoff = Quality.AZW3.Id,
+                Items = QualityFixture.GetDefaultQualities(Quality.AZW3),
             };
         }
 

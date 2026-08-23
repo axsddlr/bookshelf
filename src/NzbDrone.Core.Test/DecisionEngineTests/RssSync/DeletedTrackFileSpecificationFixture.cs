@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 {
                     Id = 1,
                     Path = "/My.Author.S01E01.mp3",
-                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)),
+                    Quality = new QualityModel(Quality.AZW3, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
                     EditionId = 1
                 };
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 {
                     Id = 2,
                     Path = "/My.Author.S01E02.mp3",
-                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)),
+                    Quality = new QualityModel(Quality.AZW3, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
                     EditionId = 2
                 };
@@ -56,21 +56,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             };
 
             var fakeAuthor = Builder<Author>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.FLAC.Id })
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.AZW3.Id })
                          .With(c => c.Path = @"C:\Music\My.Author".AsOsAgnostic())
                          .Build();
 
             _parseResultMulti = new RemoteBook
             {
                 Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.AZW3, new Revision(version: 2)) },
                 Books = doubleBookList
             };
 
             _parseResultSingle = new RemoteBook
             {
                 Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.AZW3, new Revision(version: 2)) },
                 Books = singleBookList
             };
 

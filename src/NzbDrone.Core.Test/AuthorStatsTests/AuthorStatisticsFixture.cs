@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Test.AuthorStatsTests
                 .With(e => e.Author = _author)
                 .With(e => e.Edition = _edition)
                 .With(e => e.EditionId = _edition.Id)
-                .With(e => e.Quality = new QualityModel(Quality.MP3))
+                .With(e => e.Quality = new QualityModel(Quality.AZW3))
                 .BuildList();
         }
 

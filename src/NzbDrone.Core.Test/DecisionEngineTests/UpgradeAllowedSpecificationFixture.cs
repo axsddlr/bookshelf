@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _qualityProfile = new QualityProfile
             {
-                Cutoff = Quality.FLAC.Id,
+                Cutoff = Quality.AZW3.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = false,
                 CutoffFormatScore = 100,
@@ -60,9 +60,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.FLAC),
+                new QualityModel(Quality.AZW3),
                 new List<CustomFormat>())
             .Should().BeFalse();
         }
@@ -74,9 +74,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                     _qualityProfile,
-                    new QualityModel(Quality.MP3),
+                    new QualityModel(Quality.EPUB),
                     new List<CustomFormat> { _customFormatOne },
-                    new QualityModel(Quality.MP3),
+                    new QualityModel(Quality.EPUB),
                     new List<CustomFormat> { _customFormatTwo })
                 .Should().BeFalse();
         }
@@ -88,9 +88,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatOne },
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatTwo })
             .Should().BeTrue();
         }
@@ -102,9 +102,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatOne },
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatOne })
             .Should().BeTrue();
         }
@@ -116,9 +116,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatTwo },
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatOne })
             .Should().BeTrue();
         }
@@ -130,9 +130,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatTwo },
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat> { _customFormatOne })
             .Should().BeTrue();
         }
@@ -144,9 +144,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.FLAC),
+                new QualityModel(Quality.AZW3),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -158,9 +158,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -172,9 +172,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>(),
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>())
             .Should().BeTrue();
         }
@@ -186,7 +186,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>(),
                 new QualityModel(Quality.PDF),
                 new List<CustomFormat>())
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradeAllowed(
                 _qualityProfile,
-                new QualityModel(Quality.MP3),
+                new QualityModel(Quality.EPUB),
                 new List<CustomFormat>(),
                 new QualityModel(Quality.PDF),
                 new List<CustomFormat>())

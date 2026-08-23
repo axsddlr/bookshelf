@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
              new QualityProfile
              {
-                 Cutoff = Quality.MP3.Id,
+                 Cutoff = Quality.EPUB.Id,
                  Items = Qualities.QualityFixture.GetDefaultQualities(),
                  UpgradeAllowed = true
              },
@@ -32,11 +32,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
             new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.EPUB.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             },
-            new List<QualityModel> { new QualityModel(Quality.MP3, new Revision(version: 2)) },
+            new List<QualityModel> { new QualityModel(Quality.EPUB, new Revision(version: 2)) },
             new List<CustomFormat>()).Should().BeFalse();
         }
 
@@ -46,11 +46,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
             new QualityProfile
             {
-                Cutoff = Quality.AZW3.Id,
+                Cutoff = Quality.EPUB.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             },
-            new List<QualityModel> { new QualityModel(Quality.MP3, new Revision(version: 2)) },
+            new List<QualityModel> { new QualityModel(Quality.AZW3, new Revision(version: 2)) },
             new List<CustomFormat>()).Should().BeFalse();
         }
 
@@ -60,13 +60,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
             new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.EPUB.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             },
-            new List<QualityModel> { new QualityModel(Quality.MP3, new Revision(version: 1)) },
+            new List<QualityModel> { new QualityModel(Quality.EPUB, new Revision(version: 1)) },
             new List<CustomFormat>(),
-            new QualityModel(Quality.MP3, new Revision(version: 2))).Should().BeTrue();
+            new QualityModel(Quality.EPUB, new Revision(version: 2))).Should().BeTrue();
         }
 
         [Test]
@@ -75,13 +75,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
             new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.EPUB.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             },
-            new List<QualityModel> { new QualityModel(Quality.MP3, new Revision(version: 2)) },
+            new List<QualityModel> { new QualityModel(Quality.EPUB, new Revision(version: 2)) },
             new List<CustomFormat>(),
-            new QualityModel(Quality.FLAC, new Revision(version: 2))).Should().BeFalse();
+            new QualityModel(Quality.AZW3, new Revision(version: 2))).Should().BeFalse();
         }
 
         [Test]
@@ -89,16 +89,16 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var profile = new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.EPUB.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             };
 
             Subject.CutoffNotMet(
                 profile,
-                new List<QualityModel> { new QualityModel(Quality.FLAC, new Revision(version: 1)) },
+                new List<QualityModel> { new QualityModel(Quality.AZW3, new Revision(version: 1)) },
                 new List<CustomFormat>(),
-                new QualityModel(Quality.FLAC, new Revision(version: 2))).Should().BeTrue();
+                new QualityModel(Quality.AZW3, new Revision(version: 2))).Should().BeTrue();
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var profile = new QualityProfile
             {
-                Cutoff = Quality.FLAC.Id,
+                Cutoff = Quality.AZW3.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = false
             };
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 profile,
                 new List<QualityModel> { new QualityModel(Quality.Unknown, new Revision(version: 1)) },
                 new List<CustomFormat>(),
-                new QualityModel(Quality.MP3, new Revision(version: 2))).Should().BeFalse();
+                new QualityModel(Quality.EPUB, new Revision(version: 2))).Should().BeFalse();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
             _localTrack = new LocalTrack
             {
                 Path = @"C:\Test\Imagine Dragons\Imagine.Dragons.Song.1.mp3",
-                Quality = new QualityModel(Quality.MP3, new Revision(version: 1)),
+                Quality = new QualityModel(Quality.MOBI, new Revision(version: 1)),
                 Author = _author,
                 Book = _book
             };
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.MP3, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.PDF, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.MP3, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.PDF, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.AZW3, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.AZW3, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -135,14 +135,14 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.MP3, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.PDF, new Revision(version: 1))
                                                                                 }))
                                                      .TheNext(1)
                                                      .With(e => e.TrackFileId = 2)
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.AZW3, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                          new TrackFile
                                                          {
-                                                             Quality = new QualityModel(Quality.MP3, new Revision(version: 2))
+                                                             Quality = new QualityModel(Quality.MOBI, new Revision(version: 2))
                                                          }))
                                                      .Build()
                                                      .ToList();
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                          new TrackFile
                                                          {
-                                                             Quality = new QualityModel(Quality.MP3, new Revision(version: 2))
+                                                             Quality = new QualityModel(Quality.MOBI, new Revision(version: 2))
                                                          }))
                                                      .Build()
                                                      .ToList();
@@ -199,7 +199,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _localTrack.Quality = new QualityModel(Quality.FLAC);
+            _localTrack.Quality = new QualityModel(Quality.MOBI);
 
             _localTrack.Tracks = Builder<Track>.CreateListOfSize(1)
                                                      .All()
@@ -207,7 +207,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                          new TrackFile
                                                          {
-                                                             Quality = new QualityModel(Quality.FLAC, new Revision(version: 2))
+                                                             Quality = new QualityModel(Quality.MOBI, new Revision(version: 2))
                                                          }))
                                                      .Build()
                                                      .ToList();

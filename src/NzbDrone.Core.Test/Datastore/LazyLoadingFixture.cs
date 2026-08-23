@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.Datastore
             var profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.AZW3.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             };
 

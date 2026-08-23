@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _firstFile = new BookFile { Quality = new QualityModel(Quality.FLAC, new Revision(version: 2)), DateAdded = DateTime.Now };
-            _secondFile = new BookFile { Quality = new QualityModel(Quality.FLAC, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _firstFile = new BookFile { Quality = new QualityModel(Quality.AZW3, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _secondFile = new BookFile { Quality = new QualityModel(Quality.AZW3, new Revision(version: 2)), DateAdded = DateTime.Now };
 
             var singleBookList = new List<Book> { new Book { BookFiles = new List<BookFile>() } };
             var doubleBookList = new List<Book> { new Book { BookFiles = new List<BookFile>() }, new Book { BookFiles = new List<BookFile>() }, new Book { BookFiles = new List<BookFile>() } };
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                          .With(c => c.QualityProfile = new QualityProfile
                          {
                              UpgradeAllowed = true,
-                             Cutoff = Quality.MP3.Id,
+                             Cutoff = Quality.EPUB.Id,
                              Items = Qualities.QualityFixture.GetDefaultQualities(),
                              FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("None"),
                              MinFormatScore = 0,
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultMulti = new RemoteBook
             {
                 Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.EPUB, new Revision(version: 2)) },
                 Books = doubleBookList,
                 CustomFormats = new List<CustomFormat>()
             };
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultSingle = new RemoteBook
             {
                 Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.EPUB, new Revision(version: 2)) },
                 Books = singleBookList,
                 CustomFormats = new List<CustomFormat>()
             };
@@ -77,12 +77,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithFirstFileUpgradable()
         {
-            _firstFile.Quality = new QualityModel(Quality.MP3);
+            _firstFile.Quality = new QualityModel(Quality.EPUB);
         }
 
         private void WithSecondFileUpgradable()
         {
-            _secondFile.Quality = new QualityModel(Quality.MP3);
+            _secondFile.Quality = new QualityModel(Quality.EPUB);
         }
 
         [Test]
@@ -125,9 +125,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_not_be_upgradable_if_qualities_are_the_same()
         {
-            _firstFile.Quality = new QualityModel(Quality.MP3);
-            _secondFile.Quality = new QualityModel(Quality.MP3);
-            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.MP3);
+            _firstFile.Quality = new QualityModel(Quality.EPUB);
+            _secondFile.Quality = new QualityModel(Quality.EPUB);
+            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.EPUB);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -153,7 +153,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Returns(new List<CustomFormat>());
 
             WithFirstFileUpgradable();
-            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.MP3);
+            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.EPUB);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
     }

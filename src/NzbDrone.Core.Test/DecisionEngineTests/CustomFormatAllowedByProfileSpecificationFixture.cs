@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var fakeArtist = Builder<Author>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
-                    Cutoff = Quality.FLAC.Id,
+                    Cutoff = Quality.AZW3.Id,
                     MinFormatScore = 1
                 })
                 .Build();
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteAlbum = new RemoteBook
             {
                 Author = fakeArtist,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.AZW3, new Revision(version: 2)) },
             };
 
             CustomFormatsTestHelpers.GivenCustomFormats(_format1, _format2);

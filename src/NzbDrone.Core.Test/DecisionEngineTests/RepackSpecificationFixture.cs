@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Mocker.Resolve<UpgradableSpecification>();
 
             _parsedBookInfo = Builder<ParsedBookInfo>.CreateNew()
-                                                           .With(p => p.Quality = new QualityModel(Quality.FLAC,
+                                                           .With(p => p.Quality = new QualityModel(Quality.AZW3,
                                                                new Revision(2, 0, false)))
                                                            .With(p => p.ReleaseGroup = "Readarr")
                                                            .Build();
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.MP3);
+                c.Quality = new QualityModel(Quality.EPUB);
                 return c;
             }).ToList();
 
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -146,7 +146,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -175,7 +175,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -202,7 +202,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -231,7 +231,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -261,7 +261,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -290,7 +290,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 
@@ -318,7 +318,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
             _trackFiles.Select(c =>
             {
-                c.Quality = new QualityModel(Quality.FLAC);
+                c.Quality = new QualityModel(Quality.AZW3);
                 return c;
             }).ToList();
 

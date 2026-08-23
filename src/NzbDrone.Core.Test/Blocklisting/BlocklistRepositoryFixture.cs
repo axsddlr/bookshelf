@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             {
                 AuthorId = 12345,
                 BookIds = new List<int> { 1 },
-                Quality = new QualityModel(Quality.FLAC),
+                Quality = new QualityModel(Quality.AZW3),
                 SourceTitle = "author.name.book.title",
                 Date = DateTime.UtcNow
             };

@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             {
                 Author = new Author(),
                 Books = new List<Book> { new Book() },
-                ParsedBookInfo = Builder<ParsedBookInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.FLAC)).Build()
+                ParsedBookInfo = Builder<ParsedBookInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.AZW3)).Build()
             };
 
             Mocker.GetMock<IParsingService>()

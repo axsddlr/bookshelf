@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport
                 Author = series,
                 Book = episode,
                 Path = Path.Combine(series.Path, "01 Some Body Loves.mkv"),
-                Quality = new QualityModel(Quality.FLAC),
+                Quality = new QualityModel(Quality.AZW3),
                 ReleaseGroup = "DRONE"
             };
         }
@@ -125,7 +125,6 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport
                                .BeNull();
         }
 
-        [TestCase(".flac")]
         [TestCase(".par2")]
         [TestCase(".nzb")]
         public void should_remove_extension_from_nzb_title_for_scene_name(string extension)

@@ -31,14 +31,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _firstFile = new BookFile { Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)), DateAdded = DateTime.Now };
-            _secondFile = new BookFile { Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _firstFile = new BookFile { Quality = new QualityModel(Quality.AZW3, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _secondFile = new BookFile { Quality = new QualityModel(Quality.AZW3, new Revision(version: 1)), DateAdded = DateTime.Now };
 
             var singleBookList = new List<Book> { new Book { }, new Book { } };
             var doubleBookList = new List<Book> { new Book { }, new Book { }, new Book { } };
 
             var fakeAuthor = Builder<Author>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.FLAC.Id })
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.AZW3.Id })
                          .Build();
 
             Mocker.GetMock<IMediaFileService>()

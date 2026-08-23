@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteBook = Builder<RemoteBook>.CreateNew()
                                                    .With(r => r.Author = _author)
                                                    .With(r => r.Books = new List<Book> { _book })
-                                                   .With(r => r.ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3) })
+                                                   .With(r => r.ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.AZW3) })
                                                    .With(r => r.CustomFormats = new List<CustomFormat>())
                                                    .Build();
 
@@ -126,14 +126,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_everything_is_the_same()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.FLAC.Id;
+            _author.QualityProfile.Value.Cutoff = Quality.AZW3.Id;
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
                 .With(r => r.Author = _author)
                 .With(r => r.Books = new List<Book> { _book })
                 .With(r => r.ParsedBookInfo = new ParsedBookInfo
                 {
-                    Quality = new QualityModel(Quality.MP3)
+                    Quality = new QualityModel(Quality.AZW3)
                 })
                 .With(r => r.CustomFormats = new List<CustomFormat>())
                 .With(r => r.Release = _releaseInfo)
@@ -147,14 +147,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_when_quality_in_queue_is_lower()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.MP3.Id;
+            _author.QualityProfile.Value.Cutoff = Quality.AZW3.Id;
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
                                                       .With(r => r.Author = _author)
                                                       .With(r => r.Books = new List<Book> { _book })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.AZW3)
+                                                          Quality = new QualityModel(Quality.EPUB)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -172,7 +172,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Books = new List<Book> { _otherBook })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.MP3)
+                                                          Quality = new QualityModel(Quality.AZW3)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(r => r.Books = new List<Book> { _book })
                 .With(r => r.ParsedBookInfo = new ParsedBookInfo
                 {
-                    Quality = new QualityModel(Quality.MP3)
+                    Quality = new QualityModel(Quality.AZW3)
                 })
                 .With(r => r.Release = _releaseInfo)
                 .With(r => r.CustomFormats = lowFormat)
@@ -218,7 +218,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Books = new List<Book> { _book })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.MP3)
+                                                          Quality = new QualityModel(Quality.AZW3)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -231,14 +231,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_when_quality_in_queue_is_better()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.FLAC.Id;
+            _author.QualityProfile.Value.Cutoff = Quality.AZW3.Id;
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
                                                       .With(r => r.Author = _author)
                                                       .With(r => r.Books = new List<Book> { _book })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.MP3)
+                                                          Quality = new QualityModel(Quality.AZW3)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -256,7 +256,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Books = new List<Book> { _book, _otherBook })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.MP3)
+                                                          Quality = new QualityModel(Quality.AZW3)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -274,7 +274,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Books = new List<Book> { _book })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.MP3)
+                                                          Quality = new QualityModel(Quality.AZW3)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -294,7 +294,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                       .With(r => r.Books = new List<Book> { _book, _otherBook })
                                                       .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.MP3)
+                                                          Quality = new QualityModel(Quality.AZW3)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -315,7 +315,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                                        .With(r => r.CustomFormats = new List<CustomFormat>())
                                                        .With(r => r.ParsedBookInfo = new ParsedBookInfo
                                                        {
-                                                           Quality = new QualityModel(Quality.MP3)
+                                                           Quality = new QualityModel(Quality.AZW3)
                                                        })
                                                        .With(r => r.Release = _releaseInfo)
                                                        .TheFirst(1)
@@ -332,7 +332,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_when_quality_is_better_and_upgrade_allowed_is_false_for_quality_profile()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.FLAC.Id;
+            _author.QualityProfile.Value.Cutoff = Quality.AZW3.Id;
             _author.QualityProfile.Value.UpgradeAllowed = false;
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
@@ -340,7 +340,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(r => r.Books = new List<Book> { _book })
                 .With(r => r.ParsedBookInfo = new ParsedBookInfo
                 {
-                    Quality = new QualityModel(Quality.FLAC)
+                    Quality = new QualityModel(Quality.AZW3)
                 })
                 .With(r => r.Release = _releaseInfo)
                 .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -353,14 +353,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_everything_is_the_same_for_failed_pending()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.FLAC.Id;
+            _author.QualityProfile.Value.Cutoff = Quality.AZW3.Id;
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
                 .With(r => r.Author = _author)
                 .With(r => r.Books = new List<Book> { _book })
                 .With(r => r.ParsedBookInfo = new ParsedBookInfo
                 {
-                    Quality = new QualityModel(Quality.MP3)
+                    Quality = new QualityModel(Quality.AZW3)
                 })
                 .With(r => r.Release = _releaseInfo)
                 .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -374,7 +374,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_same_quality_non_proper_in_queue_and_download_propers_is_do_not_upgrade()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.FLAC, new Revision(2));
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.AZW3, new Revision(2));
             _author.QualityProfile.Value.Cutoff = _remoteBook.ParsedBookInfo.Quality.Quality.Id;
 
             Mocker.GetMock<IConfigService>()
@@ -386,7 +386,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(r => r.Books = new List<Book> { _book })
                 .With(r => r.ParsedBookInfo = new ParsedBookInfo
                 {
-                    Quality = new QualityModel(Quality.FLAC)
+                    Quality = new QualityModel(Quality.AZW3)
                 })
                 .With(r => r.Release = _releaseInfo)
                 .With(r => r.CustomFormats = new List<CustomFormat>())
