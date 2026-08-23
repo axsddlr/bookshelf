@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -71,26 +70,6 @@ namespace NzbDrone.Core.Parser
                 case Codec.AZW3:
                     result.Quality = Quality.AZW3;
                     break;
-                case Codec.FLAC:
-                case Codec.ALAC:
-                case Codec.WAVPACK:
-                    result.Quality = Quality.FLAC;
-                    break;
-                case Codec.AAC:
-                    result.Quality = Quality.M4B;
-                    break;
-                case Codec.MP1:
-                case Codec.MP2:
-                case Codec.MP3VBR:
-                case Codec.MP3CBR:
-                case Codec.APE:
-                case Codec.WMA:
-                case Codec.WAV:
-                case Codec.AACVBR:
-                case Codec.OGG:
-                case Codec.OPUS:
-                    result.Quality = Quality.MP3;
-                    break;
                 case Codec.Unknown:
                 default:
                     result.Quality = Quality.Unknown;
@@ -109,16 +88,6 @@ namespace NzbDrone.Core.Parser
                 {
                     //Swallow exception for cases where string contains illegal
                     //path characters.
-                }
-            }
-
-            //Based on category
-            if (result.Quality == Quality.Unknown && categories != null)
-            {
-                if (categories.Any(x => x >= 3000 && x < 4000))
-                {
-                    result.Quality = Quality.UnknownAudio;
-                    result.QualityDetectionSource = QualityDetectionSource.Category;
                 }
             }
 
@@ -231,15 +200,16 @@ namespace NzbDrone.Core.Parser
         {
             switch (codec)
             {
-                case Codec.ALAC:
-                case Codec.FLAC:
-                case Codec.WAVPACK:
-                case Codec.WAV:
-                    return Quality.FLAC;
-                case Codec.AAC:
-                    return Quality.M4B;
+                case Codec.PDF:
+                    return Quality.PDF;
+                case Codec.EPUB:
+                    return Quality.EPUB;
+                case Codec.MOBI:
+                    return Quality.MOBI;
+                case Codec.AZW3:
+                    return Quality.AZW3;
                 default:
-                    return Quality.MP3;
+                    return Quality.Unknown;
             }
         }
 

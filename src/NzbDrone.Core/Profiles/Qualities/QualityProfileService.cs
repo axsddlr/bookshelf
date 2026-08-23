@@ -103,13 +103,6 @@ namespace NzbDrone.Core.Profiles.Qualities
                 Quality.MOBI,
                 Quality.EPUB,
                 Quality.AZW3);
-
-            AddDefaultProfile("Spoken",
-                              Quality.MP3,
-                              Quality.UnknownAudio,
-                              Quality.MP3,
-                              Quality.M4B,
-                              Quality.FLAC);
         }
 
         public void Handle(CustomFormatAddedEvent message)
