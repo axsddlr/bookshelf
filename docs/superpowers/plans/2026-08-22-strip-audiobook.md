@@ -475,6 +475,99 @@ git commit -m "test: replace or remove audio Quality references in Core.Test fix
 
 ---
 
+### Task 1.7: Fix three test regressions surfaced by Task 1.6's full suite run
+
+Task 1.6's full `dotnet test` run (2489 passed, 7 failed) surfaced 3
+failures that are real regressions from Tasks 1/1.5's production-code
+changes, not covered by any file grepped for `Quality.MP3/FLAC/M4B/
+UnknownAudio` literals — these tests failed via a codec-tag string, an
+`Insert` call count, and a stale item count, none of which match that grep
+pattern. The other 4 failures from that run (2 external-API network flakes
+against `api.bookinfo.pro`, 1 DST/timezone assertion) are genuinely
+unrelated and out of scope — do not touch them.
+
+**Files:**
+- Modify: `src/NzbDrone.Core.Test/ParserTests/QualityParserFixture.cs`
+- Modify: `src/NzbDrone.Core.Test/Profiles/QualityProfileServiceFixture.cs`
+- Modify: `src/NzbDrone.Core.Test/ProviderTests/DiskScanProviderTests/GetAudioFilesFixture.cs`
+
+- [ ] **Step 1: Delete the M4A-specific test case in QualityParserFixture.cs**
+
+The test `should_parse_quality_from_name` (around line 42-46) has a single
+`[TestCase("Little Mix - Salute [Deluxe Edition] [2013] [M4A-256]-V3nom [GLT")]`
+asserting the parser detects quality from an M4A (audio) codec tag in the
+name. Audio codec detection from filenames no longer exists (Task 1.5
+removed the FLAC/AAC/MP3 codec arms from `QualityParser`'s switch). Delete
+this test method entirely — it is a case-1 audio-specific test, the same
+category Task 1.6 already handled for the file's other audio test methods
+(`should_parse_mp3_quality`/`should_parse_flac_quality`, already deleted).
+
+- [ ] **Step 2: Fix the default-profile count assertion in QualityProfileServiceFixture.cs**
+
+`init_should_add_default_profiles` (line ~20-31) asserts
+`Mocker.GetMock<IProfileRepository>().Verify(v => v.Insert(It.IsAny<QualityProfile>()), Times.Exactly(2));`
+Task 1.5 removed the "Spoken" default profile, leaving only "eBook" — change
+`Times.Exactly(2)` to `Times.Exactly(1)`.
+
+- [ ] **Step 3: Fix GetAudioFilesFixture.cs's stale book-file count and audio fixture data**
+
+Read the full file first (it's short, ~110 lines). The `_fileNames` array
+in `Setup()` (lines 23-32) includes `"30 Rock1.mp3"` and `"30 Rock2.flac"`
+alongside three ebook files and two non-book files (`movie.exe`, `movie`).
+`should_return_book_files_only` (line 85-91) asserts `HaveCount(5)` —
+previously 5 = 3 ebook + 2 audio; now audio extensions are not recognized
+as book files, so `GetBookFiles` correctly returns only the 3 ebook files.
+
+Remove the two audio filenames from `_fileNames` (they no longer belong in
+a "book files" fixture — the class's own name, `GetAudioFilesFixture`, is
+now misleading given the app is ebook-only, but renaming the class/file is
+out of scope for this task; leave the filename/classname as-is) and change
+the assertion to `HaveCount(3)`:
+
+```csharp
+_fileNames = new[]
+            {
+                @"30 Rock3.pdf",
+                @"30 Rock4.epub",
+                @"30 Rock.mobi",
+                @"movie.exe",
+                @"movie"
+            };
+```
+
+```csharp
+[Test]
+public void should_return_book_files_only()
+{
+    GivenFiles(GetFiles(_path));
+
+    Subject.GetBookFiles(_path).Should().HaveCount(3);
+}
+```
+
+Leave `should_check_all_directories`, `should_check_all_directories_when_allDirectories_is_true`,
+`should_check_top_level_directory_only_when_allDirectories_is_false`, and
+`should_filter_certain_sub_folders` untouched — none depend on the specific
+file count.
+
+- [ ] **Step 4: Run the full Core.Test suite**
+
+Run: `"C:\Users\aincrad\AppData\Local\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin\mise.exe" exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj`
+Expected: the 3 failures this task targets now pass. The 4 remaining
+failures from Task 1.6's run (2 `BookInfoProxySearchFixture` network flakes,
+1 DST/timezone assertion in `PrioritizeDownloadDecisionFixture`) are
+expected to still fail — confirm by name that only those 4 remain failing,
+nothing new broke.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/NzbDrone.Core.Test/ParserTests/QualityParserFixture.cs src/NzbDrone.Core.Test/Profiles/QualityProfileServiceFixture.cs src/NzbDrone.Core.Test/ProviderTests/DiskScanProviderTests/GetAudioFilesFixture.cs
+git commit -m "test: fix default-profile count, disk-scan count, and remove stale M4A test case"
+```
+
+---
+
 ### Task 2: Remove audio branch from DistanceCalculator
 
 **Files:**
