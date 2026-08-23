@@ -197,6 +197,162 @@ git commit -m "refactor: remove audio quality enum values and extension mapping"
 
 ---
 
+### Task 1.5: Fix remaining Quality.MP3/FLAC/M4B/UnknownAudio compile references
+
+Task 1's implementer found three production files, not identified during
+planning, that reference the deleted `Quality.MP3`/`Quality.FLAC`/
+`Quality.M4B`/`Quality.UnknownAudio` static properties. These are compile
+errors after Task 1, unrelated to Tasks 2-4's scope (DistanceCalculator,
+ImportApprovedBooks, AudioTagService) — a separate gap this task closes.
+
+**Files:**
+- Modify: `src/NzbDrone.Core/Profiles/Qualities/QualityProfileService.cs:107-112`
+- Modify: `src/NzbDrone.Core/Parser/QualityParser.cs:74-81,92,116-122`
+- Modify: `src/NzbDrone.Core/Organizer/FileNameSampleService.cs:93,105`
+
+- [ ] **Step 1: Remove the "Spoken" default quality profile from QualityProfileService.cs**
+
+The `Handle(ApplicationStartedEvent message)` method sets up two default
+profiles: `"eBook"` and `"Spoken"`. The `"Spoken"` profile only lists
+audio qualities — with those qualities gone, delete the whole
+`AddDefaultProfile("Spoken", ...)` call, keep `"eBook"`:
+
+```csharp
+public void Handle(ApplicationStartedEvent message)
+{
+    if (All().Any())
+    {
+        return;
+    }
+
+    _logger.Info("Setting up default quality profiles");
+
+    AddDefaultProfile("eBook",
+        Quality.MOBI,
+        Quality.MOBI,
+        Quality.EPUB,
+        Quality.AZW3);
+}
+```
+
+- [ ] **Step 2: Remove audio codec branches from QualityParser.cs**
+
+In the `switch (codec)` block (around line 74-93), delete the
+`case Codec.FLAC: case Codec.ALAC: case Codec.WAVPACK: result.Quality = Quality.FLAC; break;`
+arm, the `case Codec.AAC: result.Quality = Quality.M4B; break;` arm, and
+the `case Codec.MP1: case Codec.MP2: case Codec.MP3VBR: case Codec.MP3CBR: case Codec.APE: case Codec.WMA: case Codec.WAV: case Codec.AACVBR: case Codec.OGG: case Codec.OPUS: result.Quality = Quality.MP3; break;`
+arm. Result:
+
+```csharp
+switch (codec)
+{
+    case Codec.PDF:
+        result.Quality = Quality.PDF;
+        break;
+    case Codec.EPUB:
+        result.Quality = Quality.EPUB;
+        break;
+    case Codec.MOBI:
+        result.Quality = Quality.MOBI;
+        break;
+    case Codec.AZW3:
+        result.Quality = Quality.AZW3;
+        break;
+    case Codec.Unknown:
+    default:
+        result.Quality = Quality.Unknown;
+        break;
+}
+```
+
+Further down (around line 116-122), the "Based on category" block sets
+`result.Quality = Quality.UnknownAudio;` for a category range check. Delete
+that whole `if (categories.Any(x => x >= 3000 && x < 4000))` block:
+
+```csharp
+//Based on category
+if (result.Quality == Quality.Unknown && categories != null)
+{
+}
+```
+
+Leave this as a genuinely empty guarded block only if removing it entirely
+breaks surrounding control flow — read the full method first (it is
+`ParseQuality` or similarly named; read the whole function body before
+editing) and prefer deleting the entire `if` statement outright if nothing
+else depends on the block existing.
+
+Do not touch the `Codec` enum itself, `ParseCodec`, or the PDF/EPUB/MOBI/AZW3
+cases — those stay. Do not touch the "Based on extension" block that calls
+`MediaFileExtensions.GetQualityForExtension` — Task 1 already made that
+ebook-only.
+
+- [ ] **Step 3: Fix FileNameSampleService.cs sample data**
+
+Read the surrounding class first — `_singleTrackFile` and `_multiTrackFile`
+are audio-format sample fixtures for a UI naming-preview feature. Since
+audio files no longer exist as a quality, replace both `Quality.MP3`
+references with an ebook quality so the file still compiles and the sample
+still represents a valid `BookFile`:
+
+```csharp
+_singleTrackFile = new BookFile
+{
+    Quality = new QualityModel(Quality.EPUB, new Revision(2)),
+    Path = "/books/Author.Name.Book.Name.EPUB.epub",
+    SceneName = "Author.Name.Book.Name.EPUB",
+    ReleaseGroup = "RlsGrp",
+    MediaInfo = mediaInfo,
+    Edition = _standardEdition,
+    Part = 1,
+    PartCount = 1
+};
+
+_multiTrackFile = new BookFile
+{
+    Quality = new QualityModel(Quality.EPUB, new Revision(2)),
+    Path = "/books/Author.Name.Book.Name.EPUB.epub",
+    SceneName = "Author.Name.Book.Name.EPUB",
+    ReleaseGroup = "RlsGrp",
+    MediaInfo = mediaInfo,
+    Edition = _standardEdition,
+    Part = 1,
+    PartCount = 2
+};
+```
+
+Read the file's full context first — if `_singleTrackFile`/`_multiTrackFile`
+names or the surrounding `mediaInfo`/`AudioFormat` fixture fields are used
+elsewhere in this file in a way that assumes audio (e.g. a test asserting
+on "Track" naming tokens), keep the path/name changes minimal and consistent
+with what the rest of the file expects — the goal is compiling code with a
+valid ebook quality, not a full audio-to-ebook fixture rename if that would
+break other assertions in the same file. If in doubt, only change the
+`Quality.MP3` → `Quality.EPUB` line and leave paths/names alone.
+
+- [ ] **Step 4: Build the whole Core project and run the Quality/MediaFileExtensions test filter**
+
+Run: `"C:\Users\aincrad\AppData\Local\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin\mise.exe" exec -- dotnet build src/NzbDrone.Core/NzbDrone.Core.csproj`
+Expected: build succeeds (no more `Quality.MP3`/`FLAC`/`M4B`/`UnknownAudio`
+compile errors network-wide — Tasks 2-4 may still have their own dead-branch
+compile errors if not yet done; this step is a checkpoint on this task's
+scope, not the whole plan).
+
+Then run: `"C:\Users\aincrad\AppData\Local\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin\mise.exe" exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter "FullyQualifiedName~Quality|FullyQualifiedName~MediaFileExtensions|FullyQualifiedName~FileNameSampleService|FullyQualifiedName~QualityProfileService"`
+Expected: PASS (this may still fail to build if Tasks 2-4's files haven't
+landed yet — if so, note that in the report the same way Task 1 did, and
+confirm via `dotnet build src/NzbDrone.Core/NzbDrone.Core.csproj` that
+this task's own files compile clean).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/NzbDrone.Core/Profiles/Qualities/QualityProfileService.cs src/NzbDrone.Core/Parser/QualityParser.cs src/NzbDrone.Core/Organizer/FileNameSampleService.cs
+git commit -m "refactor: remove remaining audio quality references in profile/parser/sample services"
+```
+
+---
+
 ### Task 2: Remove audio branch from DistanceCalculator
 
 **Files:**
