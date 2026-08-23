@@ -24,8 +24,6 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
 
         private static readonly List<string> EbookFormats = new List<string> { "Kindle Edition", "Nook", "ebook" };
 
-        private static readonly List<string> AudiobookFormats = new List<string> { "Audiobook", "Audio CD", "Audio Cassette", "Audible Audio", "CD-ROM", "MP3 CD" };
-
         public static Distance BookDistance(List<LocalBook> localTracks, Edition edition)
         {
             var dist = new Distance();
@@ -137,23 +135,10 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             }
 
             // try to tilt it towards the correct "type" of release
-            var isAudio = MediaFileExtensions.AudioExtensions.Contains(localTracks.First().Path.GetPathExtension());
-
             if (edition.Format.IsNotNullOrWhiteSpace())
             {
-                if (!isAudio)
-                {
-                    // text books should prefer ebook formats
-                    dist.AddBool("ebook_format", !EbookFormats.Contains(edition.Format));
-
-                    // text books should not match audio entries
-                    dist.AddBool("wrong_format", AudiobookFormats.Contains(edition.Format));
-                }
-                else
-                {
-                    // audio books should prefer audio formats
-                    dist.AddBool("audio_format", !AudiobookFormats.Contains(edition.Format));
-                }
+                // text books should prefer ebook formats
+                dist.AddBool("ebook_format", !EbookFormats.Contains(edition.Format));
             }
 
             return dist;
