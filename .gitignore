@@ -156,3 +156,5 @@ _temp_*/**/*
 
 _cache/
 _temp/
+
+.worktrees/
