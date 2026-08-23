@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
@@ -129,17 +128,6 @@ namespace NzbDrone.Core.MediaFiles.BookImport
                 // {
                 //     RemoveExistingTrackFiles(author, book);
                 // }
-
-                // Make sure part numbers are populated for audiobooks
-                // If all audio files and all part numbers are zero, set them by filename order
-                if (decisionList.All(b => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(b.Item.Path)) && b.Item.Part == 0))
-                {
-                    var part = 1;
-                    foreach (var d in decisionList.OrderBy(x => PadNumbers.Replace(x.Item.Path)))
-                    {
-                        d.Item.Part = part++;
-                    }
-                }
 
                 // set the correct release to be monitored before importing the new files
                 var newRelease = bookDecision.First().Item.Edition;
