@@ -353,6 +353,128 @@ git commit -m "refactor: remove remaining audio quality references in profile/pa
 
 ---
 
+### Task 1.6: Clean up audio Quality references across Core.Test fixtures
+
+Task 1.5's implementer found that `dotnet test
+src/NzbDrone.Core.Test/Readarr.Core.Test.csproj` still fails to build after
+Tasks 1 and 1.5, because 41 test fixture files under `src/NzbDrone.Core.Test`
+directly reference `Quality.MP3`/`Quality.FLAC`/`Quality.M4B`/
+`Quality.UnknownAudio` as literals in test setup code — 272 occurrences
+total. This is a real gap in the plan's original file inventory (planning
+grepped `src/NzbDrone.Core` production code but not `src/NzbDrone.Core.Test`
+for these specific literals). This task closes it so the Core.Test project
+compiles and the full suite can run.
+
+**Files:** all files below, found via
+`grep -rln "Quality\.MP3\|Quality\.FLAC\|Quality\.M4B\|Quality\.UnknownAudio" src/NzbDrone.Core.Test`
+— re-run that grep at the start of this task in case Tasks 1/1.5 already
+touched any (they didn't, per Task 1.5's report, but confirm):
+
+```
+AuthorStatsTests/AuthorStatisticsFixture.cs
+Blocklisting/BlocklistRepositoryFixture.cs
+Blocklisting/BlocklistServiceFixture.cs
+DecisionEngineTests/AlreadyImportedSpecificationFixture.cs
+DecisionEngineTests/CustomFormatAllowedByProfileSpecificationFixture.cs
+DecisionEngineTests/CutoffSpecificationFixture.cs
+HistoryTests/HistoryServiceFixture.cs
+HistoryTests/HistoryRepositoryFixture.cs
+Download/DownloadApprovedReportsTests/DownloadApprovedFixture.cs
+DecisionEngineTests/DownloadDecisionMakerFixture.cs
+DecisionEngineTests/QualityAllowedByProfileSpecificationFixture.cs
+DecisionEngineTests/PrioritizeDownloadDecisionFixture.cs
+DecisionEngineTests/QueueSpecificationFixture.cs
+Download/Pending/PendingReleaseServiceTests/RemoveRejectedFixture.cs
+Datastore/LazyLoadingFixture.cs
+Download/Pending/PendingReleaseServiceTests/RemoveGrabbedFixture.cs
+DecisionEngineTests/RepackSpecificationFixture.cs
+Datastore/DatabaseRelationshipFixture.cs
+Download/Pending/PendingReleaseServiceTests/AddFixture.cs
+DecisionEngineTests/UpgradeSpecificationFixture.cs
+DecisionEngineTests/UpgradeDiskSpecificationFixture.cs
+DecisionEngineTests/UpgradeAllowedSpecificationFixture.cs
+Datastore/Converters/QualityIntConverterFixture.cs
+DecisionEngineTests/RssSync/DelaySpecificationFixture.cs
+DecisionEngineTests/RssSync/DeletedTrackFileSpecificationFixture.cs
+MusicTests/ArtistRepositoryTests/ArtistRepositoryFixture.cs
+DecisionEngineTests/RssSync/ProperSpecificationFixture.cs
+DecisionEngineTests/RssSync/HistorySpecificationFixture.cs
+Qualities/QualityModelComparerFixture.cs
+Qualities/QualityDefinitionServiceFixture.cs
+MediaFiles/MediaFileRepositoryFixture.cs
+MediaFiles/ImportApprovedTracksFixture.cs
+ParserTests/HashedReleaseFixture.cs
+ParserTests/QualityParserFixture.cs
+MediaFiles/TrackImport/GetSceneNameFixture.cs
+OrganizerTests/FileNameBuilderTests/CleanTitleFixture.cs
+OrganizerTests/FileNameBuilderTests/FileNameBuilderFixture.cs
+OrganizerTests/FileNameBuilderTests/TitleTheFixture.cs
+MediaFiles/TrackImport/ImportDecisionMakerFixture.cs
+Profiles/ProfileRepositoryFixture.cs
+MediaFiles/TrackImport/Specifications/UpgradeSpecificationFixture.cs
+```
+
+**Decision rule for every occurrence** (apply per-site, not per-file — a
+single file can contain both cases):
+
+1. **The test specifically exercises audio-format behavior** (e.g. a test
+   named `*_audio_format*`, `*audiobook*`, or asserting on `AudioExtensions`/
+   `WriteAudioTags`/audio-only logic) → delete that test method. This should
+   be rare — Task 1.5's report found no such tests among the failures
+   (`QualityParserFixture.cs`, `QualityProfileServiceFixture.cs` compiled
+   fine), so expect nearly all sites to fall into case 2.
+2. **The test uses `Quality.MP3`/`Quality.FLAC`/`Quality.M4B`/
+   `Quality.UnknownAudio` only as a stand-in value** — e.g. "some other
+   quality than the one under test", a second/third item in a list, a
+   generic non-equal comparison — → replace it with an ebook quality that
+   preserves the same relative ordering/distinctness the test relies on.
+   Prefer `Quality.AZW3` as the default replacement for "a different
+   quality than X" (it's the highest-weight remaining ebook quality, weight
+   12, so it preserves greater-than comparisons against `PDF`/`MOBI`/`EPUB`
+   the same way the audio qualities, at weights 100+, used to). If a test
+   specifically relies on relative ordering between two swapped values
+   (e.g. asserts `FLAC > MP3`), preserve that ordering using two distinct
+   ebook qualities in the same relative order (`AZW3` > `EPUB` > `MOBI` >
+   `PDF` by weight, per `Quality.cs`'s `DefaultQualityDefinitions`).
+
+Read every file's relevant test method(s) in full before editing — do not
+pattern-match on the literal alone. A `Quality.FLAC` used as "the quality of
+the file under test, must not match" is case 2; a `Quality.FLAC` used inside
+an assertion like `result.Quality.Should().Be(Quality.FLAC)` for a codec
+that no longer maps to anything is case 1 (delete — that codec has no
+mapped quality anymore per Task 1.5).
+
+- [ ] **Step 1: Re-confirm the file list**
+
+Run: `grep -rln "Quality\.MP3\|Quality\.FLAC\|Quality\.M4B\|Quality\.UnknownAudio" src/NzbDrone.Core.Test`
+Compare against the list above; note any drift (files Tasks 1-1.5 already
+fixed, or new ones).
+
+- [ ] **Step 2: Work through the files in the list, applying the decision rule**
+
+For each file: read the full test method containing each occurrence,
+classify per the decision rule above, edit accordingly. Batch this as one
+pass through all files — do not create 41 separate commits; this is one
+task with one cohesive change.
+
+- [ ] **Step 3: Build and run the full Core.Test project**
+
+Run: `"C:\Users\aincrad\AppData\Local\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin\mise.exe" exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj`
+Expected: build succeeds, zero compile errors referencing the deleted
+Quality values. Some individual tests may still fail if Tasks 2-4 (not yet
+done at this point in the plan) haven't landed — note any such failures by
+name and confirm they trace to DistanceCalculator/ImportApprovedBooks/
+AudioTagService (Tasks 2-4's territory), not to this task's edits.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add -A
+git commit -m "test: replace or remove audio Quality references in Core.Test fixtures"
+```
+
+---
+
 ### Task 2: Remove audio branch from DistanceCalculator
 
 **Files:**
