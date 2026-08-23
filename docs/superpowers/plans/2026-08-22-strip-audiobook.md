@@ -629,12 +629,12 @@ git commit -m "refactor: remove audiobook format scoring from DistanceCalculator
 - Modify: `src/NzbDrone.Core/MediaFiles/BookImport/ImportApprovedBooks.cs:133-142`
   (read the surrounding method first to confirm exact line range before
   editing — line numbers may have shifted)
-- Test: `src/NzbDrone.Core.Test/MediaFiles/BookImport/ImportApprovedBooksFixture.cs`
+- Test: `src/NzbDrone.Core.Test/MediaFiles/ImportApprovedTracksFixture.cs`
   (read first — check for any test exercising audio part-number inference)
 
 - [ ] **Step 1: Read the existing import test file**
 
-Run: read `src/NzbDrone.Core.Test/MediaFiles/BookImport/ImportApprovedBooksFixture.cs`
+Run: read `src/NzbDrone.Core.Test/MediaFiles/ImportApprovedTracksFixture.cs`
 in full. Note any test that relies on all-audio-file part-number inference
 — delete it in Step 3.
 
@@ -667,7 +667,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/NzbDrone.Core/MediaFiles/BookImport/ImportApprovedBooks.cs src/NzbDrone.Core.Test/MediaFiles/BookImport/ImportApprovedBooksFixture.cs
+git add src/NzbDrone.Core/MediaFiles/BookImport/ImportApprovedBooks.cs src/NzbDrone.Core.Test/MediaFiles/ImportApprovedTracksFixture.cs
 git commit -m "refactor: remove audiobook part-number inference from import"
 ```
 
