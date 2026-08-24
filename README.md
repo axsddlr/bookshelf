@@ -4,11 +4,9 @@ This is a revival of [Readarr](https://github.com/Readarr/Readarr). The images
 published are configured to use working Goodreads or Hardcover metadata out of
 the box.
 
-Bookshelf is an ebook and audiobook collection manager for Usenet and BitTorrent
+Bookshelf is an ebook collection manager for Usenet and BitTorrent
 users. It can monitor multiple RSS feeds for new books from your favorite
-authors and will grab, sort, and rename them. Note that only one type of a
-given book is supported. If you want both an audiobook and ebook of a given
-book you will need multiple instances.
+authors and will grab, sort, and rename them.
 
 ## Getting Started
 
