@@ -67,8 +67,6 @@ namespace NzbDrone.Core.Configuration
 
         //Metadata
         string MetadataSource { get; set; }
-        WriteAudioTagsType WriteAudioTags { get; set; }
-        bool ScrubAudioTags { get; set; }
         WriteBookTagsType WriteBookTags { get; set; }
         bool UpdateCovers { get; set; }
         bool EmbedMetadata { get; set; }

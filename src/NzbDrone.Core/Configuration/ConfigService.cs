@@ -287,20 +287,6 @@ namespace NzbDrone.Core.Configuration
             }
         }
 
-        public WriteAudioTagsType WriteAudioTags
-        {
-            get { return GetValueEnum("WriteAudioTags", WriteAudioTagsType.No); }
-
-            set { SetValue("WriteAudioTags", value); }
-        }
-
-        public bool ScrubAudioTags
-        {
-            get { return GetValueBoolean("ScrubAudioTags", false); }
-
-            set { SetValue("ScrubAudioTags", value); }
-        }
-
         public WriteBookTagsType WriteBookTags
         {
             get { return GetValueEnum("WriteBookTags", WriteBookTagsType.NewFiles); }
