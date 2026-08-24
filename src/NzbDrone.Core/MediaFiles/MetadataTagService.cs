@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
-using NLog;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.Messaging.Commands;
@@ -22,14 +21,10 @@ namespace NzbDrone.Core.MediaFiles
         IExecute<RetagAuthorCommand>
     {
         private readonly IEBookTagService _eBookTagService;
-        private readonly Logger _logger;
 
-        public MetadataTagService(IEBookTagService eBookTagService,
-            Logger logger)
+        public MetadataTagService(IEBookTagService eBookTagService)
         {
             _eBookTagService = eBookTagService;
-
-            _logger = logger;
         }
 
         public ParsedTrackInfo ReadTags(IFileInfo file)

@@ -23,8 +23,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         private const string TITLE = "Some.Author-Some.Book-2018-320kbps-CD-Readarr";
 
         private Author _author;
-        private QualityModel _mp3;
-        private QualityModel _flac;
+        private QualityModel _azw3;
+        private QualityModel _epub;
         private RemoteBook _remoteBook;
         private List<EntityHistory> _history;
         private BookFile _firstFile;
@@ -46,13 +46,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _firstFile = new BookFile { Quality = new QualityModel(Quality.EPUB, new Revision(version: 2)), DateAdded = DateTime.Now };
 
-            _mp3 = new QualityModel(Quality.AZW3, new Revision(version: 1));
-            _flac = new QualityModel(Quality.EPUB, new Revision(version: 1));
+            _azw3 = new QualityModel(Quality.AZW3, new Revision(version: 1));
+            _epub = new QualityModel(Quality.EPUB, new Revision(version: 1));
 
             _remoteBook = new RemoteBook
             {
                 Author = _author,
-                ParsedBookInfo = new ParsedBookInfo { Quality = _mp3 },
+                ParsedBookInfo = new ParsedBookInfo { Quality = _azw3 },
                 Books = singleBookList,
                 Release = Builder<ReleaseInfo>.CreateNew()
                                               .Build()
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_be_accepted_if_book_does_not_have_imported_event()
         {
-            GivenHistoryItem(Guid.NewGuid().ToString().ToUpper(), TITLE, _mp3, EntityHistoryEventType.Grabbed);
+            GivenHistoryItem(Guid.NewGuid().ToString().ToUpper(), TITLE, _azw3, EntityHistoryEventType.Grabbed);
 
             Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
         }
@@ -129,8 +129,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.BookFileImported);
+            GivenHistoryItem(downloadId, TITLE, _azw3, EntityHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _azw3, EntityHistoryEventType.BookFileImported);
 
             Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
         }
@@ -140,8 +140,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _flac, EntityHistoryEventType.BookFileImported);
+            GivenHistoryItem(downloadId, TITLE, _azw3, EntityHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _epub, EntityHistoryEventType.BookFileImported);
 
             _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
@@ -156,8 +156,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _flac, EntityHistoryEventType.BookFileImported);
+            GivenHistoryItem(downloadId, TITLE, _azw3, EntityHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _epub, EntityHistoryEventType.BookFileImported);
 
             _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
@@ -170,8 +170,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_be_accepted_if_release_torrent_hash_is_null_and_downloadId_is_null()
         {
-            GivenHistoryItem(null, TITLE, _mp3, EntityHistoryEventType.Grabbed);
-            GivenHistoryItem(null, TITLE, _flac, EntityHistoryEventType.BookFileImported);
+            GivenHistoryItem(null, TITLE, _azw3, EntityHistoryEventType.Grabbed);
+            GivenHistoryItem(null, TITLE, _epub, EntityHistoryEventType.BookFileImported);
 
             _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
@@ -186,8 +186,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var downloadId = Guid.NewGuid().ToString().ToUpper();
 
-            GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
-            GivenHistoryItem(downloadId, TITLE, _flac, EntityHistoryEventType.BookFileImported);
+            GivenHistoryItem(downloadId, TITLE, _azw3, EntityHistoryEventType.Grabbed);
+            GivenHistoryItem(downloadId, TITLE, _epub, EntityHistoryEventType.BookFileImported);
 
             _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
