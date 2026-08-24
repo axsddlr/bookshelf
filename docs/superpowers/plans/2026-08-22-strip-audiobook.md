@@ -961,3 +961,286 @@ present, keep "ebook" language intact.
 git add README.md
 git commit -m "docs: update README to reflect ebook-only scope"
 ```
+
+---
+
+### Task 7: Database migration to remap removed audio quality ids (Critical, found by final whole-branch review)
+
+The final whole-branch review (after Task 6) found a data-corruption bug the
+task-level reviews couldn't catch, because it's invisible to both the
+compiler and the test suite: `Quality.AllLookup` (`src/NzbDrone.Core/
+Qualities/Quality.cs:90`) is sized dynamically as `All.Select(v =>
+v.Id).Max() + 1`. Before this branch that was `14` (ids 0-13, with
+audio at 10-13). After Task 1 removed the audio enum values, `All`'s
+highest id is now `4` (AZW3), so `AllLookup` shrank to length `5` —
+**the id gap was never actually left; the array just got shorter.**
+
+This matters because `src/NzbDrone.Core/Datastore/Migration/
+011_update_audio_qualities.cs` (a migration that ran on every existing,
+non-fresh database) wrote quality ids `10`, `12`, and `13` into every
+`QualityProfiles.Items` row, and audio `BookFiles.Quality` documents
+already existed with those ids from normal use. `Quality.FindById` (called
+via the `(Quality)item` explicit operator, used by `QualityIntConverter.Read`
+and `DapperQualityIntConverter.Parse` — the read path for both
+`QualityProfiles.Items` and `BookFiles.Quality`) throws
+`ArgumentException` for any id it doesn't recognize. Any database that has
+ever run migration 011 (i.e. any non-fresh install) will throw on startup
+when loading a quality profile containing ids 10/12/13, and throw when
+reading a `BookFile` row for a previously imported audiobook.
+
+There's also a related off-by-one: `FindById`'s bounds check is `id >
+AllLookup.Length` (line 118), but valid indices are `0..Length-1`, so
+`FindById(5)` — the id immediately after the last live quality — passes
+the guard and throws an uncaught `IndexOutOfRangeException` instead of the
+intended `ArgumentException`. This existed before this branch too (it was
+reachable at `FindById(14)`), but it's more exposed now since id 5 sits
+right at the boundary a stale profile or future ebook format could hit.
+
+**Files:**
+- Modify: `src/NzbDrone.Core/Qualities/Quality.cs:118`
+- Create: `src/NzbDrone.Core/Datastore/Migration/041_remove_audio_qualities.cs`
+- Test: `src/NzbDrone.Core.Test/Datastore/Migration/` (check existing
+  migration test patterns — e.g. any `*MigrationFixture.cs` — before
+  writing new tests; follow the same pattern)
+
+- [ ] **Step 1: Fix the off-by-one bounds check in Quality.cs**
+
+```csharp
+public static Quality FindById(int id)
+{
+    if (id == 0)
+    {
+        return Unknown;
+    }
+    else if (id >= AllLookup.Length)
+    {
+        throw new ArgumentException("ID does not match a known quality", nameof(id));
+    }
+
+    var quality = AllLookup[id];
+
+    if (quality == null)
+    {
+        throw new ArgumentException("ID does not match a known quality", nameof(id));
+    }
+
+    return quality;
+}
+```
+
+(Only `id > AllLookup.Length` → `id >= AllLookup.Length` changes.)
+
+- [ ] **Step 2: Write migration 041 to remap ids 10/12/13 to Unknown (0) in QualityProfiles and BookFiles**
+
+Read `src/NzbDrone.Core/Datastore/Migration/011_update_audio_qualities.cs`
+in full first — this migration follows the same
+raw-SQL-plus-manual-JSON-patch shape, but must NOT depend on the current
+`NzbDrone.Core.Qualities.Quality` enum or `QualityIntConverter` (a
+migration must remain correct forever, independent of what the live
+application's enum looks like at any future point — reusing the live
+converter, as migration 011 does, is a latent bug worth avoiding here even
+though it's out of scope to fix in 011 itself). Use `System.Text.Json`
+directly against the raw `Items`/`Quality` JSON columns instead:
+
+```csharp
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text.Json;
+using Dapper;
+using FluentMigrator;
+using NzbDrone.Core.Datastore.Migration.Framework;
+
+namespace NzbDrone.Core.Datastore.Migration
+{
+    [Migration(041)]
+    public class remove_audio_qualities : NzbDroneMigrationBase
+    {
+        private static readonly HashSet<int> RemovedAudioQualityIds = new HashSet<int> { 10, 11, 12, 13 };
+        private const int UnknownQualityId = 0;
+
+        protected override void MainDbUpgrade()
+        {
+            Execute.WithConnection(RemapAudioQualities);
+        }
+
+        private void RemapAudioQualities(IDbConnection conn, IDbTransaction tran)
+        {
+            RemapQualityProfiles(conn, tran);
+            RemapBookFiles(conn, tran);
+        }
+
+        private void RemapQualityProfiles(IDbConnection conn, IDbTransaction tran)
+        {
+            var profiles = conn.Query("SELECT \"Id\", \"Cutoff\", \"Items\" FROM \"QualityProfiles\"", transaction: tran)
+                .Select(x => new { Id = (int)x.Id, Cutoff = (int)x.Cutoff, Items = (string)x.Items })
+                .ToList();
+
+            foreach (var profile in profiles)
+            {
+                var items = JsonSerializer.Deserialize<List<ProfileItem041>>(profile.Items);
+                var changed = false;
+
+                foreach (var item in items)
+                {
+                    changed |= RemapItem(item);
+                }
+
+                var cutoff = profile.Cutoff;
+                if (RemovedAudioQualityIds.Contains(cutoff))
+                {
+                    cutoff = UnknownQualityId;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    conn.Execute(
+                        "UPDATE \"QualityProfiles\" SET \"Cutoff\" = @Cutoff, \"Items\" = @Items WHERE \"Id\" = @Id",
+                        new { profile.Id, Cutoff = cutoff, Items = JsonSerializer.Serialize(items) },
+                        transaction: tran);
+                }
+            }
+        }
+
+        private bool RemapItem(ProfileItem041 item)
+        {
+            var changed = false;
+
+            if (RemovedAudioQualityIds.Contains(item.Quality))
+            {
+                item.Quality = UnknownQualityId;
+                changed = true;
+            }
+
+            foreach (var child in item.Items)
+            {
+                changed |= RemapItem(child);
+            }
+
+            return changed;
+        }
+
+        private void RemapBookFiles(IDbConnection conn, IDbTransaction tran)
+        {
+            var files = conn.Query("SELECT \"Id\", \"Quality\" FROM \"BookFiles\"", transaction: tran)
+                .Select(x => new { Id = (int)x.Id, Quality = (string)x.Quality })
+                .ToList();
+
+            foreach (var file in files)
+            {
+                var quality = JsonSerializer.Deserialize<QualityModel041>(file.Quality);
+
+                if (RemovedAudioQualityIds.Contains(quality.Quality))
+                {
+                    quality.Quality = UnknownQualityId;
+
+                    conn.Execute(
+                        "UPDATE \"BookFiles\" SET \"Quality\" = @Quality WHERE \"Id\" = @Id",
+                        new { file.Id, Quality = JsonSerializer.Serialize(quality) },
+                        transaction: tran);
+                }
+            }
+        }
+
+        public class ProfileItem041
+        {
+            public int Quality { get; set; }
+            public bool Allowed { get; set; }
+            public List<ProfileItem041> Items { get; set; } = new List<ProfileItem041>();
+        }
+
+        public class QualityModel041
+        {
+            public int Quality { get; set; }
+            public object Revision { get; set; }
+        }
+    }
+}
+```
+
+Read the actual JSON shape of a `QualityProfiles.Items` row and a
+`BookFiles.Quality` value first (check `QualityProfile.cs`/`QualityModel.cs`
+and `011_update_audio_qualities.cs`'s `ProfileItem10` for the exact
+property names/casing the JSON serializer produces) — adjust
+`ProfileItem041`/`QualityModel041`'s property names if they don't match
+exactly what's actually stored (the System.Text.Json default is
+PascalCase matching C# property names, which should align with how
+`QualityIntConverter`/the embedded-document writer originally serialized
+these documents, but verify against the live schema before trusting the
+snippet above verbatim).
+
+- [ ] **Step 3: Write a migration test constructing a profile/file row with ids 10-13 and asserting the migration remaps them**
+
+Follow the existing pattern for migration tests in
+`src/NzbDrone.Core.Test/Datastore/Migration/` (find one that tests a
+similarly-shaped JSON-column migration, e.g. search for existing tests of
+migration 011 or any other `ProfileItem`/`QualityProfiles`-touching
+migration test, and mirror its `SqliteDatabase`/`WithMigrationAt` setup
+pattern). The test should: seed a `QualityProfiles` row with an `Items`
+array containing an entry with `Quality = 12` (M4B) and `Cutoff = 10`
+(MP3), plus a `BookFiles` row with `Quality = {"Quality":13,...}`
+(UnknownAudio), run migration 041, then assert the profile's item now has
+`Quality = 0`, `Cutoff = 0`, and the book file's `Quality.Quality = 0`.
+
+- [ ] **Step 4: Run the full test suite**
+
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj`
+Expected: the new migration test passes; the documented 4 pre-existing
+flakes (1 DST/timezone, 3 api.bookinfo.pro network) are the only failures.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/NzbDrone.Core/Qualities/Quality.cs src/NzbDrone.Core/Datastore/Migration/041_remove_audio_qualities.cs src/NzbDrone.Core.Test/Datastore/Migration/
+git commit -m "fix: add migration to remap removed audio quality ids, fix FindById off-by-one"
+```
+
+---
+
+### Task 8: Clean up remaining Minor findings from final review
+
+Bundle the review's remaining Important/Minor findings into one cleanup
+commit (small, mechanical, all touched by this branch's own work):
+
+**Files:**
+- Modify: `src/NzbDrone.Core/MediaFiles/MetadataTagService.cs`
+- Modify: `src/NzbDrone.Core/Localization/Core/en.json`
+- Modify: `src/NzbDrone.Core.Test/DecisionEngineTests/AlreadyImportedSpecificationFixture.cs`
+
+- [ ] **Step 1: Remove the now-dead `_logger` field from MetadataTagService.cs**
+
+Read the current file. Remove the `_logger` field, its constructor
+parameter, and the `using NLog;` import — nothing in the class reads
+`_logger` after the audio-dispatch branches were removed in Task 4.
+Verify no other method added a `_logger.*` call since Task 4 (re-read the
+whole file first).
+
+- [ ] **Step 2: Remove two orphaned locale keys from en.json**
+
+Remove the `"AudioFileMetadata"` key (line ~54) and `"WriteTagsNo"` key
+(line ~1111) from `src/NzbDrone.Core/Localization/Core/en.json` — both
+were referenced only by the deleted `writeAudioTagOptions` block in
+`MetadataProvider.js` (Task 4). Confirm via grep that `WriteTagsSync`/
+`WriteTagsAll`/`WriteTagsNew` (still used by `writeBookTagOptions`) are
+left untouched. Keep JSON valid.
+
+- [ ] **Step 3: Rename stale `_mp3`/`_flac` variables in AlreadyImportedSpecificationFixture.cs**
+
+Lines ~26-27 declare `_mp3`/`_flac` holding `Quality.AZW3`/`Quality.EPUB`
+(from Task 1.6's fixture swap). Rename to `_azw3`/`_epub` (matching the
+actual quality values) throughout the file — use `replace_all` for both
+names since they're referenced at 9 usage sites per the Task 1.6 review.
+
+- [ ] **Step 4: Run the affected test filters**
+
+Run: `mise exec -- dotnet test src/NzbDrone.Core.Test/Readarr.Core.Test.csproj --filter "FullyQualifiedName~AlreadyImportedSpecification"`
+Expected: PASS, same test count as before (pure rename, no behavior
+change).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/NzbDrone.Core/MediaFiles/MetadataTagService.cs src/NzbDrone.Core/Localization/Core/en.json src/NzbDrone.Core.Test/DecisionEngineTests/AlreadyImportedSpecificationFixture.cs
+git commit -m "refactor: remove dead logger field, orphaned locale keys, and stale test variable names"
+```
